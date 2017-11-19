@@ -1,14 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ObjectPrinting
 {
 	public class PrintingConfig<TOwner>
 	{
+		private readonly List<Type> typesToExclude = new List<Type>();
 
 		public string PrintToString(TOwner obj)
 		{
@@ -35,25 +35,18 @@ namespace ObjectPrinting
 			sb.AppendLine(type.Name);
 			foreach (var propertyInfo in type.GetProperties())
 			{
+				if (typesToExclude.Contains(propertyInfo.PropertyType))
+					continue;
 				sb.Append(identation + propertyInfo.Name + " = " +
-						  PrintToString(propertyInfo.GetValue(obj),
-							  nestingLevel + 1));
+						PrintToString(propertyInfo.GetValue(obj),
+							nestingLevel + 1));
 			}
 			return sb.ToString();
 		}
 
-		public PrintingConfig<TOwner> ExcludePropertyOfType<TPropType>()
+		public PrintingConfig<TOwner> Excluding<TPropType>()
 		{
-			return this;
-		}
-
-		public PrintingConfig<TOwner> UseNewSerializationFor<T>(Func<T, string> func)
-		{
-			return this;
-		}
-
-		public PrintingConfig<TOwner> ChangeCurrentCulture()
-		{
+			typesToExclude.Add(typeof(TPropType));
 			return this;
 		}
 
@@ -63,9 +56,14 @@ namespace ObjectPrinting
 		}
 
 
-		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> func)
+		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
 			return new PropertyPrintingConfig<TOwner, TPropType>(this);
+		}
+
+		public PrintingConfig<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> func)
+		{
+			return this;
 		}
 	}
 }
