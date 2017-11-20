@@ -28,7 +28,7 @@ namespace ObjectPrinting.Tests
 				//5. Настроить обрезание строковых свойств (метод должен быть виден только для строковых свойств)
 				.Print(obj => obj.Name)
 					.TakeSubstring(1)
-				//6. Исключить из сериализации конкретного свойства
+				//6. Исключить из сериализации конкретное свойство
 				.Excluding(obj => obj.Age);
 
 
@@ -40,22 +40,53 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
-		public void ChangeSerializationForProperty()
+		public void TakeSubstring()
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
 			var printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
-				//4. Настроить сериализацию конкретного свойства
 				.Print(obj => obj.Name)
-				.Using(name => "NAME\r\n");
+				.TakeSubstring(2);
 
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = NAME\r\n\tHeight = 11\r\n");
+			printer.PrintToString(person).Should().Be("Person\r\n\tName = Al\r\n\tHeight = 11\r\n");
+		}
+		[Test]
+		public void ChangeCulturalInfo()
+		{
+			var person = new Person { Name = "Alex", Height = 11.2 };
+
+			var printer = ObjectPrinter.For<Person>()
+				.Excluding<Guid>()
+				.Excluding<int>();
+			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11,2\r\n");
+
+			printer = ObjectPrinter.For<Person>()
+				.Excluding<Guid>()
+				.Excluding<int>()
+				.Print<double>()
+				.Using(CultureInfo.InvariantCulture);
+
+			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
 		}
 
 		[Test]
-		public void AlternativeSerializationForType()
+		public void ChangeSerializationFor_Property()
+		{
+			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
+
+			var printer = ObjectPrinter.For<Person>()
+				.Excluding<Guid>()
+				.Excluding<int>()
+				.Print(obj => obj.Height)
+				.Using(name => "NAME");
+
+			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NAME\r\n");
+		}
+
+		[Test]
+		public void ChangeSerializationFor_Type()
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
@@ -63,17 +94,27 @@ namespace ObjectPrinting.Tests
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print<string>()
-					.Using(str => "STR\r\n");
+					.Using(str => "STR");
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = STR\r\n\tHeight = 11\r\n");
 		}
 
 		[Test]
-		public void ExcludeProperty()
+		public void Exclude_Type()
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
 			var printer = ObjectPrinter.For<Person>().Excluding<Guid>().Excluding<int>();
+
+			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
+		}
+
+		[Test]
+		public void Exclude_Property()
+		{
+			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
+
+			var printer = ObjectPrinter.For<Person>().Excluding(p => p.Id).Excluding<int>();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 		}

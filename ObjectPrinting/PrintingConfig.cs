@@ -8,7 +8,15 @@ namespace ObjectPrinting
 {
 	public class PrintingConfig<TOwner>
 	{
+		private readonly List<string> propertiesToExclude = new List<string>();
 		private readonly List<Type> typesToExclude = new List<Type>();
+		internal bool ChangeType;
+		internal string PropertyToChange;
+
+		internal Dictionary<string, Func<object, string>> SerializationForProperties =
+			new Dictionary<string, Func<object, string>>();
+
+		internal Dictionary<Type, Func<object, string>> SerializationForTypes = new Dictionary<Type, Func<object, string>>();
 
 		public string PrintToString(TOwner obj)
 		{
@@ -17,7 +25,6 @@ namespace ObjectPrinting
 
 		private string PrintToString(object obj, int nestingLevel)
 		{
-			//TODO apply configurations
 			if (obj == null)
 				return "null" + Environment.NewLine;
 
@@ -35,8 +42,25 @@ namespace ObjectPrinting
 			sb.AppendLine(type.Name);
 			foreach (var propertyInfo in type.GetProperties())
 			{
-				if (typesToExclude.Contains(propertyInfo.PropertyType))
+				var propertyType = propertyInfo.PropertyType;
+				var propertyName = propertyInfo.Name;
+
+				if (typesToExclude.Contains(propertyType) || propertiesToExclude.Contains(propertyName))
 					continue;
+				if (SerializationForProperties.ContainsKey(propertyInfo.Name))
+				{
+					sb.Append(identation + propertyInfo.Name + " = "
+							+ SerializationForProperties[propertyInfo.Name](propertyInfo.GetValue(obj))
+							+ Environment.NewLine);
+					continue;
+				}
+				if (SerializationForTypes.ContainsKey(propertyInfo.PropertyType))
+				{
+					sb.Append(identation + propertyInfo.Name + " = "
+							+ SerializationForTypes[propertyInfo.PropertyType](propertyInfo.GetValue(obj))
+							+ Environment.NewLine);
+					continue;
+				}
 				sb.Append(identation + propertyInfo.Name + " = " +
 						PrintToString(propertyInfo.GetValue(obj),
 							nestingLevel + 1));
@@ -52,17 +76,21 @@ namespace ObjectPrinting
 
 		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>()
 		{
+			ChangeType = true;
 			return new PropertyPrintingConfig<TOwner, TPropType>(this);
 		}
 
 
 		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
+			ChangeType = false;
+			PropertyToChange = ((MemberExpression) memberSelector.Body).Member.Name;
 			return new PropertyPrintingConfig<TOwner, TPropType>(this);
 		}
 
-		public PrintingConfig<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> func)
+		public PrintingConfig<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
+			propertiesToExclude.Add(((MemberExpression) memberSelector.Body).Member.Name);
 			return this;
 		}
 	}
