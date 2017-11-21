@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace ObjectPrinting
 {
@@ -17,60 +15,13 @@ namespace ObjectPrinting
 			new Dictionary<string, Func<object, string>>();
 
 		internal Dictionary<Type, Func<object, string>> SerializationForTypes = new Dictionary<Type, Func<object, string>>();
+		internal IReadOnlyList<string> PropertiesToExclude => propertiesToExclude;
+		internal IReadOnlyList<Type> TypesToExclude => typesToExclude;
 
-		public string PrintToString(TOwner obj)
+
+		public ObjectPrinter<TOwner> Build()
 		{
-			return PrintToString(obj, 0);
-		}
-
-		private string PrintToString(object obj, int nestingLevel)
-		{
-			if (obj == null)
-				return "null" + Environment.NewLine;
-
-			var finalTypes = new[]
-			{
-				typeof(int), typeof(double), typeof(float), typeof(string),
-				typeof(DateTime), typeof(TimeSpan)
-			};
-			if (finalTypes.Contains(obj.GetType()))
-				return obj + Environment.NewLine;
-
-			var identation = new string('\t', nestingLevel + 1);
-			var sb = new StringBuilder();
-			var type = obj.GetType();
-			sb.AppendLine(type.Name);
-			foreach (var propertyInfo in type.GetProperties())
-			{
-				var propertyType = propertyInfo.PropertyType;
-				var propertyName = propertyInfo.Name;
-
-				if (typesToExclude.Contains(propertyType) || propertiesToExclude.Contains(propertyName))
-					continue;
-				if (SerializationForProperties.ContainsKey(propertyName))
-				{
-					sb.Append(identation)
-						.Append(propertyInfo.Name)
-						.Append(" = ")
-						.Append(SerializationForProperties[propertyName](propertyInfo.GetValue(obj)))
-						.Append(Environment.NewLine);
-					continue;
-				}
-				if (SerializationForTypes.ContainsKey(propertyType))
-				{
-					sb.Append(identation)
-						.Append(propertyInfo.Name)
-						.Append(" = ")
-						.Append(SerializationForTypes[propertyType](propertyInfo.GetValue(obj)))
-						.Append(Environment.NewLine);
-					continue;
-				}
-				sb.Append(identation)
-					.Append(propertyInfo.Name)
-					.Append(" = ")
-					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1));
-			}
-			return sb.ToString();
+			return new ObjectPrinter<TOwner>(this);
 		}
 
 		public PrintingConfig<TOwner> Excluding<TPropType>()

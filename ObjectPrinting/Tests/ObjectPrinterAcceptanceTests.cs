@@ -13,7 +13,7 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19 };
 
-			var printer = ObjectPrinter.For<Person>()
+			var printer = ObjectPrinter<Person>.Configure()
 				//1. Исключить из сериализации свойства определенного типа
 				.Excluding<Guid>()
 				//2. Указать альтернативный способ сериализации для определенного типа
@@ -29,7 +29,8 @@ namespace ObjectPrinting.Tests
 				.Print(obj => obj.Name)
 					.TakeSubstring(1)
 				//6. Исключить из сериализации конкретное свойство
-				.Excluding(obj => obj.Age);
+				.Excluding(obj => obj.Age)
+				.Build();
 
 
 
@@ -44,11 +45,12 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter.For<Person>()
+			var printer = ObjectPrinter<Person>.Configure()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print(obj => obj.Name)
-				.TakeSubstring(2);
+				.TakeSubstring(2)
+				.Build();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Al\r\n\tHeight = 11\r\n");
 		}
@@ -57,16 +59,18 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Height = 11.2 };
 
-			var printer = ObjectPrinter.For<Person>()
+			var printer = ObjectPrinter<Person>.Configure()
 				.Excluding<Guid>()
-				.Excluding<int>();
+				.Excluding<int>()
+				.Build();
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11,2\r\n");
 
-			printer = ObjectPrinter.For<Person>()
+			printer = ObjectPrinter<Person>.Configure()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print<double>()
-				.Using(CultureInfo.InvariantCulture);
+				.Using(CultureInfo.InvariantCulture)
+				.Build();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
 		}
@@ -76,11 +80,12 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter.For<Person>()
+			var printer = ObjectPrinter<Person>.Configure()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print(obj => obj.Height)
-				.Using(name => "NAME");
+				.Using(name => "NAME")
+				.Build();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NAME\r\n");
 		}
@@ -90,11 +95,12 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter.For<Person>()
+			var printer = ObjectPrinter<Person>.Configure()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print<string>()
-					.Using(str => "STR");
+					.Using(str => "STR")
+				.Build();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = STR\r\n\tHeight = 11\r\n");
 		}
@@ -104,7 +110,10 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter.For<Person>().Excluding<Guid>().Excluding<int>();
+			var printer = ObjectPrinter<Person>.Configure()
+				.Excluding<Guid>()
+				.Excluding<int>()
+				.Build();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 		}
@@ -114,7 +123,10 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter.For<Person>().Excluding(p => p.Id).Excluding<int>();
+			var printer = ObjectPrinter<Person>.Configure()
+				.Excluding(p => p.Id)
+				.Excluding<int>()
+				.Build();
 
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 		}
