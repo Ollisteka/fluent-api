@@ -4,6 +4,13 @@ using System.Text;
 
 namespace ObjectPrinting
 {
+	public class ObjectPrinter
+	{
+		public static PrintingConfig<TOwner> For<TOwner>()
+		{
+			return new PrintingConfig<TOwner>();
+		}
+	}
 	public class ObjectPrinter<TOwner>
 	{
 		private readonly PrintingConfig<TOwner> printingConfig;
@@ -11,11 +18,6 @@ namespace ObjectPrinting
 		public ObjectPrinter(PrintingConfig<TOwner> printingConfig)
 		{
 			this.printingConfig = printingConfig;
-		}
-
-		public static PrintingConfig<TOwner> Configure()
-		{
-			return new PrintingConfig<TOwner>();
 		}
 
 		public string PrintToString(TOwner obj)
