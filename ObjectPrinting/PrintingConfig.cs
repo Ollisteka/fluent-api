@@ -47,23 +47,28 @@ namespace ObjectPrinting
 
 				if (typesToExclude.Contains(propertyType) || propertiesToExclude.Contains(propertyName))
 					continue;
-				if (SerializationForProperties.ContainsKey(propertyInfo.Name))
+				if (SerializationForProperties.ContainsKey(propertyName))
 				{
-					sb.Append(identation + propertyInfo.Name + " = "
-							+ SerializationForProperties[propertyInfo.Name](propertyInfo.GetValue(obj))
-							+ Environment.NewLine);
+					sb.Append(identation)
+						.Append(propertyInfo.Name)
+						.Append(" = ")
+						.Append(SerializationForProperties[propertyName](propertyInfo.GetValue(obj)))
+						.Append(Environment.NewLine);
 					continue;
 				}
-				if (SerializationForTypes.ContainsKey(propertyInfo.PropertyType))
+				if (SerializationForTypes.ContainsKey(propertyType))
 				{
-					sb.Append(identation + propertyInfo.Name + " = "
-							+ SerializationForTypes[propertyInfo.PropertyType](propertyInfo.GetValue(obj))
-							+ Environment.NewLine);
+					sb.Append(identation)
+						.Append(propertyInfo.Name)
+						.Append(" = ")
+						.Append(SerializationForTypes[propertyType](propertyInfo.GetValue(obj)))
+						.Append(Environment.NewLine);
 					continue;
 				}
-				sb.Append(identation + propertyInfo.Name + " = " +
-						PrintToString(propertyInfo.GetValue(obj),
-							nestingLevel + 1));
+				sb.Append(identation)
+					.Append(propertyInfo.Name)
+					.Append(" = ")
+					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1));
 			}
 			return sb.ToString();
 		}
