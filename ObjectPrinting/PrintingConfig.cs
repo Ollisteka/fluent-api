@@ -18,7 +18,6 @@ namespace ObjectPrinting
 		internal IReadOnlyList<string> PropertiesToExclude => propertiesToExclude;
 		internal IReadOnlyList<Type> TypesToExclude => typesToExclude;
 
-
 		public ObjectPrinter<TOwner> Build()
 		{
 			return new ObjectPrinter<TOwner>(this);
@@ -26,8 +25,9 @@ namespace ObjectPrinting
 
 		public PrintingConfig<TOwner> Excluding<TPropType>()
 		{
-			typesToExclude.Add(typeof(TPropType));
-			return this;
+			var newConfig = (PrintingConfig<TOwner>)MemberwiseClone();
+			newConfig.typesToExclude.Add(typeof(TPropType));
+			return newConfig;
 		}
 
 		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>()
@@ -35,7 +35,6 @@ namespace ObjectPrinting
 			ChangeType = true;
 			return new PropertyPrintingConfig<TOwner, TPropType>(this);
 		}
-
 
 		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
@@ -46,8 +45,9 @@ namespace ObjectPrinting
 
 		public PrintingConfig<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
-			propertiesToExclude.Add(((MemberExpression) memberSelector.Body).Member.Name);
-			return this;
+			var newConfig = (PrintingConfig<TOwner>)MemberwiseClone();
+			newConfig.propertiesToExclude.Add(((MemberExpression) memberSelector.Body).Member.Name);
+			return newConfig;
 		}
 	}
 }

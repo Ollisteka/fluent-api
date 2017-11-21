@@ -13,7 +13,7 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				//1. Исключить из сериализации свойства определенного типа
 				.Excluding<Guid>()
 				//2. Указать альтернативный способ сериализации для определенного типа
@@ -33,7 +33,6 @@ namespace ObjectPrinting.Tests
 				.Build();
 
 
-
 			string s1 = printer.PrintToString(person);
 
 			//7. Синтаксический сахар в виде метода расширения, сериализующего по-умолчанию		
@@ -41,11 +40,24 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
+		public void PrintingConfig_ShouldBe_Immutable()
+		{
+			var person = new Person(){Age = 12, Height = 11, Id = new Guid(), Name = "Olga"};
+			var firstConfig = ObjectPrinter.For<Person>().Excluding<Guid>().Excluding<int>();
+			var secondConfig = firstConfig.Excluding<double>();
+			var firstResult = firstConfig.Build().PrintToString(person);
+			var secondResult = secondConfig.Build().PrintToString(person);
+			firstResult.Should().Be("Person\r\n\tName = Olga\r\n\tHeight = 11\r\n");
+			secondResult.Should().Be("Person\r\n\tName = Olga\r\n");
+
+		}
+
+		[Test]
 		public void TakeSubstring()
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print(obj => obj.Name)
@@ -59,13 +71,13 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Height = 11.2 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Build();
 			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11,2\r\n");
 
-			printer = ObjectPrinter<Person>.Configure()
+			printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print<double>()
@@ -80,7 +92,7 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print(obj => obj.Height)
@@ -95,7 +107,7 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print<string>()
@@ -110,7 +122,7 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Build();
@@ -123,7 +135,7 @@ namespace ObjectPrinting.Tests
 		{
 			var person = new Person { Name = "Alex", Age = 19, Height = 11 };
 
-			var printer = ObjectPrinter<Person>.Configure()
+			var printer = ObjectPrinter.For<Person>()
 				.Excluding(p => p.Id)
 				.Excluding<int>()
 				.Build();
