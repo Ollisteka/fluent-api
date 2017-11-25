@@ -1,20 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq.Expressions;
 
 namespace ObjectPrinting
 {
 	public class PrintingConfig<TOwner>
 	{
-		private readonly List<string> propertiesToExclude = new List<string>();
-		private readonly List<Type> typesToExclude = new List<Type>();
 		internal bool ChangeType;
+		private ImmutableList<string> propertiesToExclude = ImmutableList<string>.Empty;
 		internal string PropertyToChange;
 
-		internal Dictionary<string, Func<object, string>> SerializationForProperties =
-			new Dictionary<string, Func<object, string>>();
+		internal ImmutableDictionary<string, Func<object, string>> SerializationForProperties
+			= ImmutableDictionary<string, Func<object, string>>.Empty;
 
-		internal Dictionary<Type, Func<object, string>> SerializationForTypes = new Dictionary<Type, Func<object, string>>();
+		internal ImmutableDictionary<Type, Func<object, string>> SerializationForTypes
+			= ImmutableDictionary<Type, Func<object, string>>.Empty;
+
+		private ImmutableList<Type> typesToExclude = ImmutableList<Type>.Empty;
+
 		internal IReadOnlyList<string> PropertiesToExclude => propertiesToExclude;
 		internal IReadOnlyList<Type> TypesToExclude => typesToExclude;
 
@@ -25,28 +29,29 @@ namespace ObjectPrinting
 
 		public PrintingConfig<TOwner> Excluding<TPropType>()
 		{
-			var newConfig = (PrintingConfig<TOwner>)MemberwiseClone();
-			newConfig.typesToExclude.Add(typeof(TPropType));
+			var newConfig = (PrintingConfig<TOwner>) MemberwiseClone();
+			newConfig.typesToExclude = newConfig.typesToExclude.Add(typeof(TPropType));
 			return newConfig;
 		}
 
 		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>()
 		{
 			ChangeType = true;
-			return new PropertyPrintingConfig<TOwner, TPropType>(this);
+			return new PropertyPrintingConfig<TOwner, TPropType>((PrintingConfig<TOwner>) MemberwiseClone());
 		}
 
 		public PropertyPrintingConfig<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
 			ChangeType = false;
 			PropertyToChange = ((MemberExpression) memberSelector.Body).Member.Name;
-			return new PropertyPrintingConfig<TOwner, TPropType>(this);
+			return new PropertyPrintingConfig<TOwner, TPropType>((PrintingConfig<TOwner>) MemberwiseClone());
 		}
 
 		public PrintingConfig<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
-			var newConfig = (PrintingConfig<TOwner>)MemberwiseClone();
-			newConfig.propertiesToExclude.Add(((MemberExpression) memberSelector.Body).Member.Name);
+			var newConfig = (PrintingConfig<TOwner>) MemberwiseClone();
+			newConfig.propertiesToExclude =
+				newConfig.propertiesToExclude.Add(((MemberExpression) memberSelector.Body).Member.Name);
 			return newConfig;
 		}
 	}

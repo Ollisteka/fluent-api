@@ -16,9 +16,12 @@ namespace ObjectPrinting
 		public PrintingConfig<TOwner> Using(Func<TPropType, string> serializeFunc)
 		{
 			if (printingConfig.ChangeType)
-				printingConfig.SerializationForTypes[typeof(TPropType)] = obj => serializeFunc((TPropType) obj);
+				printingConfig.SerializationForTypes =
+					printingConfig.SerializationForTypes.SetItem(typeof(TPropType), obj => serializeFunc((TPropType) obj));
 			else
-				printingConfig.SerializationForProperties[printingConfig.PropertyToChange] = obj => serializeFunc((TPropType) obj);
+				printingConfig.SerializationForProperties =
+					printingConfig.SerializationForProperties.SetItem(printingConfig.PropertyToChange,
+						obj => serializeFunc((TPropType) obj));
 			return printingConfig;
 		}
 	}
