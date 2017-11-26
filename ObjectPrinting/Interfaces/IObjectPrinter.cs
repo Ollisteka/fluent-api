@@ -2,6 +2,6 @@
 {
 	public interface IObjectPrinter<T>
 	{
-		string PrintToString(object obj);
+		string PrintToString(T obj);
 	}
 }

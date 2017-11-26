@@ -27,12 +27,12 @@ namespace ObjectPrinting
 
 		private ImmutableList<Type> typesToExclude = ImmutableList<Type>.Empty;
 
-		public string PrintToString(object obj)
+		public string PrintToString(TOwner obj)
 		{
 			return PrintToString(obj, 0);
 		}
 
-		private string PrintToString(object obj, int nestingLevel)
+		private string PrintToString(TOwner obj, int nestingLevel)
 		{
 			if (obj == null)
 				return "null" + Environment.NewLine;
@@ -78,7 +78,7 @@ namespace ObjectPrinting
 				sb.Append(identation)
 					.Append(propertyInfo.Name)
 					.Append(" = ")
-					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1));
+					.Append(PrintToString((TOwner)propertyInfo.GetValue(obj), nestingLevel + 1));
 			}
 			return sb.ToString();
 		}

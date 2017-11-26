@@ -84,6 +84,18 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
+		public void DoSomething_WhenSomething()
+		{
+
+			var printer = ObjectPrinter
+				.For<Entry>()
+				.Print<string>();
+			var p1 = printer.Using(x => x.ToLower());
+			var p2 = printer.Using(x => x.ToUpper());
+			Console.WriteLine(p1.PrintToString(new Entry { s = "aBc" }));
+			Console.WriteLine(p2.PrintToString(new Entry { s = "aBc" }));
+		}
+		[Test]
 		public void Exclude_Property()
 		{
 			ObjectPrinter.For<Person>()
