@@ -1,26 +1,33 @@
 using System;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
+using ObjectPrinting.Interfaces;
 
 namespace ObjectPrinting
 {
 	public class ObjectPrinter
 	{
-		public static PrintingConfig<TOwner> For<TOwner>()
+		public static ObjectPrinter<TOwner> For<TOwner>()
 		{
-			return new PrintingConfig<TOwner>();
+			return new ObjectPrinter<TOwner>();
 		}
 	}
-	public class ObjectPrinter<TOwner>
+
+	public class ObjectPrinter<TOwner> : IObjectPrinter<TOwner>
 	{
-		private readonly PrintingConfig<TOwner> printingConfig;
+		private ImmutableList<string> propertiesToExclude = ImmutableList<string>.Empty;
 
-		public ObjectPrinter(PrintingConfig<TOwner> printingConfig)
-		{
-			this.printingConfig = printingConfig;
-		}
+		internal ImmutableDictionary<string, Func<object, string>> SerializationForProperties
+			= ImmutableDictionary<string, Func<object, string>>.Empty;
 
-		public string PrintToString(TOwner obj)
+		internal ImmutableDictionary<Type, Func<object, string>> SerializationForTypes
+			= ImmutableDictionary<Type, Func<object, string>>.Empty;
+
+		private ImmutableList<Type> typesToExclude = ImmutableList<Type>.Empty;
+
+		public string PrintToString(object obj)
 		{
 			return PrintToString(obj, 0);
 		}
@@ -47,24 +54,24 @@ namespace ObjectPrinting
 				var propertyType = propertyInfo.PropertyType;
 				var propertyName = propertyInfo.Name;
 
-				if (printingConfig.TypesToExclude.Contains(propertyType)
-					|| printingConfig.PropertiesToExclude.Contains(propertyName))
+				if (typesToExclude.Contains(propertyType)
+					|| propertiesToExclude.Contains(propertyName))
 					continue;
-				if (printingConfig.SerializationForProperties.ContainsKey(propertyName))
+				if (SerializationForProperties.ContainsKey(propertyName))
 				{
 					sb.Append(identation)
 						.Append(propertyInfo.Name)
 						.Append(" = ")
-						.Append(printingConfig.SerializationForProperties[propertyName](propertyInfo.GetValue(obj)))
+						.Append(SerializationForProperties[propertyName](propertyInfo.GetValue(obj)))
 						.Append(Environment.NewLine);
 					continue;
 				}
-				if (printingConfig.SerializationForTypes.ContainsKey(propertyType))
+				if (SerializationForTypes.ContainsKey(propertyType))
 				{
 					sb.Append(identation)
 						.Append(propertyInfo.Name)
 						.Append(" = ")
-						.Append(printingConfig.SerializationForTypes[propertyType](propertyInfo.GetValue(obj)))
+						.Append(SerializationForTypes[propertyType](propertyInfo.GetValue(obj)))
 						.Append(Environment.NewLine);
 					continue;
 				}
@@ -74,6 +81,38 @@ namespace ObjectPrinting
 					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1));
 			}
 			return sb.ToString();
+		}
+
+
+		public ObjectPrinter<TOwner> Excluding<TPropType>()
+		{
+			var newConfig = CopyCurrentConfig();
+			newConfig.typesToExclude = newConfig.typesToExclude.Add(typeof(TPropType));
+			return newConfig;
+		}
+
+		public ObjectPrinter<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
+		{
+			var newConfig = CopyCurrentConfig();
+			newConfig.propertiesToExclude =
+				propertiesToExclude.Add(((MemberExpression) memberSelector.Body).Member.Name);
+			return newConfig;
+		}
+
+		public PropertyPrinter<TOwner, TPropType> Print<TPropType>()
+		{
+			return new PropertyPrinter<TOwner, TPropType>(CopyCurrentConfig(), true, null);
+		}
+
+		public PropertyPrinter<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
+		{
+			var propertyToChange = ((MemberExpression) memberSelector.Body).Member.Name;
+			return new PropertyPrinter<TOwner, TPropType>(CopyCurrentConfig(), false, propertyToChange);
+		}
+
+		private ObjectPrinter<TOwner> CopyCurrentConfig()
+		{
+			return (ObjectPrinter<TOwner>) MemberwiseClone();
 		}
 	}
 }

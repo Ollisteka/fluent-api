@@ -1,23 +1,24 @@
 ﻿using System;
+using ObjectPrinting.Interfaces;
 
 namespace ObjectPrinting
 {
-	public class PropertyPrintingConfig<TOwner, TPropType> : IPropertyPrintingConfig<TOwner, TPropType>
+	public class PropertyPrinter<TOwner, TPropType> : IPropertyPrinter<TOwner, TPropType>
 	{
 		private readonly bool changeType;
-		private readonly PrintingConfig<TOwner> printingConfig;
+		private readonly ObjectPrinter<TOwner> printingConfig;
 		internal readonly string PropertyToChange;
 
-		public PropertyPrintingConfig(PrintingConfig<TOwner> printingConfig, bool changeType, string propertyToChange)
+		public PropertyPrinter(ObjectPrinter<TOwner> printingConfig, bool changeType, string propertyToChange)
 		{
 			this.printingConfig = printingConfig;
 			this.changeType = changeType;
 			PropertyToChange = propertyToChange;
 		}
 
-		PrintingConfig<TOwner> IPropertyPrintingConfig<TOwner, TPropType>.PrintingConfig => printingConfig;
+		ObjectPrinter<TOwner> IPropertyPrinter<TOwner, TPropType>.PrintingConfig => printingConfig;
 
-		public PrintingConfig<TOwner> Using(Func<TPropType, string> serializeFunc)
+		public ObjectPrinter<TOwner> Using(Func<TPropType, string> serializeFunc)
 		{
 			if (changeType)
 				printingConfig.SerializationForTypes =

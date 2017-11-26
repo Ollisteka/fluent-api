@@ -21,52 +21,44 @@ namespace ObjectPrinting.Tests
 		{
 			person.Height = 11.2;
 
-			var printer = ObjectPrinter.For<Person>()
+			var config = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
-				.Excluding<int>()
-				.Build();
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11,2\r\n");
+				.Excluding<int>();
+			config.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11,2\r\n");
 
-			printer = ObjectPrinter.For<Person>()
-				.Excluding<Guid>()
-				.Excluding<int>()
-				.Print<double>()
+			config.Print<double>()
 				.Using(CultureInfo.InvariantCulture)
-				.Build();
-
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
+				.PrintToString(person)
+				.Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
 		}
 
 		[Test]
 		public void ChangeSerializationFor_Property()
 		{
-			var printer = ObjectPrinter.For<Person>()
+			ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print(obj => obj.Height)
 				.Using(name => "NAME")
-				.Build();
-
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NAME\r\n");
+				.PrintToString(person)
+				.Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NAME\r\n");
 		}
 
 		[Test]
 		public void ChangeSerializationFor_Type()
 		{
-			var printer = ObjectPrinter.For<Person>()
+			ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print<string>()
 				.Using(str => "STR")
-				.Build();
-
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = STR\r\n\tHeight = 11\r\n");
+				.PrintToString(person).Should().Be("Person\r\n\tName = STR\r\n\tHeight = 11\r\n");
 		}
 
 		[Test]
 		public void Demo()
 		{
-			var printer = ObjectPrinter.For<Person>()
+			var config = ObjectPrinter.For<Person>()
 				//1. Исключить из сериализации свойства определенного типа
 				.Excluding<Guid>()
 				//2. Указать альтернативный способ сериализации для определенного типа
@@ -82,11 +74,10 @@ namespace ObjectPrinting.Tests
 				.Print(obj => obj.Name)
 				.TakeSubstring(1)
 				//6. Исключить из сериализации конкретное свойство
-				.Excluding(obj => obj.Age)
-				.Build();
+				.Excluding(obj => obj.Age);
 
 
-			var s1 = printer.PrintToString(person);
+			var s1 = config.PrintToString(person);
 
 			//7. Синтаксический сахар в виде метода расширения, сериализующего по-умолчанию		
 			//8. ...с конфигурированием
@@ -95,23 +86,17 @@ namespace ObjectPrinting.Tests
 		[Test]
 		public void Exclude_Property()
 		{
-			var printer = ObjectPrinter.For<Person>()
+			ObjectPrinter.For<Person>()
 				.Excluding(p => p.Id)
-				.Excluding<int>()
-				.Build();
-
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
+				.Excluding<int>().PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 		}
 
 		[Test]
 		public void Exclude_Type()
 		{
-			var printer = ObjectPrinter.For<Person>()
+			ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
-				.Excluding<int>()
-				.Build();
-
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
+				.Excluding<int>().PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 		}
 
 		[Test]
@@ -123,8 +108,8 @@ namespace ObjectPrinting.Tests
 				.Print(p => p.Name)
 				.Using(str => "FIRST");
 			var secondConfig = firstConfig.Print(p => p.Height).Using(str => "TALL");
-			var firstResult = firstConfig.Build().PrintToString(person);
-			var secondResult = secondConfig.Build().PrintToString(person);
+			var firstResult = firstConfig.PrintToString(person);
+			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = FIRST\r\n\tHeight = 11\r\n");
 			secondResult.Should().Be("Person\r\n\tName = FIRST\r\n\tHeight = TALL\r\n");
 		}
@@ -138,8 +123,8 @@ namespace ObjectPrinting.Tests
 				.Print<string>()
 				.Using(str => "FIRST");
 			var secondConfig = firstConfig.Print<string>().Using(str => "SECOND");
-			var firstResult = firstConfig.Build().PrintToString(person);
-			var secondResult = secondConfig.Build().PrintToString(person);
+			var firstResult = firstConfig.PrintToString(person);
+			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = FIRST\r\n\tHeight = 11\r\n");
 			secondResult.Should().Be("Person\r\n\tName = SECOND\r\n\tHeight = 11\r\n");
 		}
@@ -149,8 +134,8 @@ namespace ObjectPrinting.Tests
 		{
 			var firstConfig = ObjectPrinter.For<Person>().Excluding(p => p.Id).Excluding(p => p.Age);
 			var secondConfig = firstConfig.Excluding(p => p.Height);
-			var firstResult = firstConfig.Build().PrintToString(person);
-			var secondResult = secondConfig.Build().PrintToString(person);
+			var firstResult = firstConfig.PrintToString(person);
+			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 			secondResult.Should().Be("Person\r\n\tName = Alex\r\n");
 		}
@@ -160,8 +145,8 @@ namespace ObjectPrinting.Tests
 		{
 			var firstConfig = ObjectPrinter.For<Person>().Excluding<Guid>().Excluding<int>();
 			var secondConfig = firstConfig.Excluding<double>();
-			var firstResult = firstConfig.Build().PrintToString(person);
-			var secondResult = secondConfig.Build().PrintToString(person);
+			var firstResult = firstConfig.PrintToString(person);
+			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
 			secondResult.Should().Be("Person\r\n\tName = Alex\r\n");
 		}
@@ -171,8 +156,8 @@ namespace ObjectPrinting.Tests
 		{
 			var firstConfig = ObjectPrinter.For<Person>().Excluding<Guid>().Excluding<int>().Excluding<double>();
 			var secondConfig = firstConfig.Print(p => p.Name).TakeSubstring(4);
-			var firstResult = firstConfig.Print(p => p.Name).TakeSubstring(2).Build().PrintToString(person);
-			var secondResult = secondConfig.Build().PrintToString(person);
+			var firstResult = firstConfig.Print(p => p.Name).TakeSubstring(2).PrintToString(person);
+			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = Al\r\n");
 			secondResult.Should().Be("Person\r\n\tName = Alex\r\n");
 		}
@@ -180,14 +165,11 @@ namespace ObjectPrinting.Tests
 		[Test]
 		public void TakeSubstring()
 		{
-			var printer = ObjectPrinter.For<Person>()
+			ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>()
 				.Print(obj => obj.Name)
-				.TakeSubstring(2)
-				.Build();
-
-			printer.PrintToString(person).Should().Be("Person\r\n\tName = Al\r\n\tHeight = 11\r\n");
+				.TakeSubstring(2).PrintToString(person).Should().Be("Person\r\n\tName = Al\r\n\tHeight = 11\r\n");
 		}
 	}
 }
