@@ -11,6 +11,6 @@ namespace ObjectPrinting.Tests
 	}
 	public class Entry
 	{
-		public string s;
+		public string s { get; set; }
 	}
 }

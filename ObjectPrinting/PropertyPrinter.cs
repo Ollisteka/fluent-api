@@ -20,14 +20,19 @@ namespace ObjectPrinting
 
 		public ObjectPrinter<TOwner> Using(Func<TPropType, string> serializeFunc)
 		{
+			var newConfig = printingConfig.CopyCurrentConfig();
 			if (changeType)
-				printingConfig.SerializationForTypes =
-					printingConfig.SerializationForTypes.SetItem(typeof(TPropType), obj => serializeFunc((TPropType) obj));
+				newConfig.SerializationForTypes =
+					newConfig.SerializationForTypes.SetItem(typeof(TPropType), obj => serializeFunc((TPropType) obj));
 			else
-				printingConfig.SerializationForProperties =
-					printingConfig.SerializationForProperties.SetItem(PropertyToChange,
+				newConfig.SerializationForProperties =
+					newConfig.SerializationForProperties.SetItem(PropertyToChange,
 						obj => serializeFunc((TPropType) obj));
-			return printingConfig;
+			return newConfig;
+		}
+		internal PropertyPrinter<TOwner, TPropType> CopyCurrentPropertyPrint()
+		{
+			return (PropertyPrinter<TOwner, TPropType>)MemberwiseClone();
 		}
 	}
 }

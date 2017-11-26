@@ -56,7 +56,8 @@ namespace ObjectPrinting
 		public static ObjectPrinter<TOwner> TakeSubstring<TOwner>
 			(this PropertyPrinter<TOwner, string> propConfig, int maxLength)
 		{
-			var printingConfig = ((IPropertyPrinter<TOwner, string>) propConfig).PrintingConfig;
+			var newConfig = propConfig.CopyCurrentPropertyPrint();
+			var printingConfig = ((IPropertyPrinter<TOwner, string>)newConfig).PrintingConfig.CopyCurrentConfig();
 			printingConfig.SerializationForProperties = printingConfig.SerializationForProperties.SetItem(
 				propConfig.PropertyToChange,
 				obj => ((string) obj).Substring(0, maxLength));

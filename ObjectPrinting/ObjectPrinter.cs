@@ -32,7 +32,7 @@ namespace ObjectPrinting
 			return PrintToString(obj, 0);
 		}
 
-		private string PrintToString(TOwner obj, int nestingLevel)
+		private string PrintToString(object obj, int nestingLevel)
 		{
 			if (obj == null)
 				return "null" + Environment.NewLine;
@@ -78,7 +78,7 @@ namespace ObjectPrinting
 				sb.Append(identation)
 					.Append(propertyInfo.Name)
 					.Append(" = ")
-					.Append(PrintToString((TOwner)propertyInfo.GetValue(obj), nestingLevel + 1));
+					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1));
 			}
 			return sb.ToString();
 		}
@@ -101,16 +101,16 @@ namespace ObjectPrinting
 
 		public PropertyPrinter<TOwner, TPropType> Print<TPropType>()
 		{
-			return new PropertyPrinter<TOwner, TPropType>(CopyCurrentConfig(), true, null);
+			return new PropertyPrinter<TOwner, TPropType>(this, true, null);
 		}
 
 		public PropertyPrinter<TOwner, TPropType> Print<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
 		{
 			var propertyToChange = ((MemberExpression) memberSelector.Body).Member.Name;
-			return new PropertyPrinter<TOwner, TPropType>(CopyCurrentConfig(), false, propertyToChange);
+			return new PropertyPrinter<TOwner, TPropType>(this, false, propertyToChange);
 		}
 
-		private ObjectPrinter<TOwner> CopyCurrentConfig()
+		internal ObjectPrinter<TOwner> CopyCurrentConfig()
 		{
 			return (ObjectPrinter<TOwner>) MemberwiseClone();
 		}

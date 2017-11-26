@@ -92,8 +92,9 @@ namespace ObjectPrinting.Tests
 				.Print<string>();
 			var p1 = printer.Using(x => x.ToLower());
 			var p2 = printer.Using(x => x.ToUpper());
-			Console.WriteLine(p1.PrintToString(new Entry { s = "aBc" }));
-			Console.WriteLine(p2.PrintToString(new Entry { s = "aBc" }));
+			var entry = new Entry {s = "aBc"};
+			p1.PrintToString(entry).Should().Be("Entry\r\n\ts = abc\r\n");
+			p2.PrintToString(entry).Should().Be("Entry\r\n\ts = ABC\r\n");
 		}
 		[Test]
 		public void Exclude_Property()
@@ -119,11 +120,11 @@ namespace ObjectPrinting.Tests
 				.Excluding<int>()
 				.Print(p => p.Name)
 				.Using(str => "FIRST");
-			var secondConfig = firstConfig.Print(p => p.Height).Using(str => "TALL");
+			var secondConfig = firstConfig.Print(p => p.Name).Using(str => "TALL");
 			var firstResult = firstConfig.PrintToString(person);
 			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = FIRST\r\n\tHeight = 11\r\n");
-			secondResult.Should().Be("Person\r\n\tName = FIRST\r\n\tHeight = TALL\r\n");
+			secondResult.Should().Be("Person\r\n\tName = TALL\r\n\tHeight = 11\r\n");
 		}
 
 		[Test]
