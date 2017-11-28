@@ -17,15 +17,6 @@ namespace ObjectPrinting.Tests
 		private Person person;
 
 		[Test]
-
-		public void Printing_Should_Work_When_Recursion()
-		{
-			var r = new R();
-			r.r = r;
-			ObjectPrinter.For<R>().PrintToString(r).Should().Be("R\r\n\tr = object itself\r\n");
-		}
-
-		[Test]
 		public void ChangeCulturalInfo()
 		{
 			person.Height = 11.2;
@@ -121,18 +112,11 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
-		public void PropertyConfig_ShoudBe_Immutable_When_ChangingCultureInfo()
+		public void Printing_Should_Work_When_Recursion()
 		{
-			person.Height = 11.2;
-			var printer = ObjectPrinter
-				.For<Person>()
-				.Excluding<Guid>()
-				.Excluding<int>()
-				.Print<double>();
-			var p1 = printer.Using(CultureInfo.InvariantCulture);
-			var p2 = printer.Using(x => "NUM");
-			p1.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
-			p2.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NUM\r\n");
+			var r = new R();
+			r.r = r;
+			ObjectPrinter.For<R>().PrintToString(r).Should().Be("R\r\n\tr = R\r\n\t\tr = object itself\r\n");
 		}
 
 		[Test]
@@ -209,6 +193,21 @@ namespace ObjectPrinting.Tests
 			var entry = new Entry {s = "aBc"};
 			p1.PrintToString(entry).Should().Be("Entry\r\n\ts = abc\r\n");
 			p2.PrintToString(entry).Should().Be("Entry\r\n\ts = ABC\r\n");
+		}
+
+		[Test]
+		public void PropertyConfig_ShoudBe_Immutable_When_ChangingCultureInfo()
+		{
+			person.Height = 11.2;
+			var printer = ObjectPrinter
+				.For<Person>()
+				.Excluding<Guid>()
+				.Excluding<int>()
+				.Print<double>();
+			var p1 = printer.Using(CultureInfo.InvariantCulture);
+			var p2 = printer.Using(x => "NUM");
+			p1.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
+			p2.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NUM\r\n");
 		}
 
 		[Test]

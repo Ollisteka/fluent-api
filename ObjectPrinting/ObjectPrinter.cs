@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,6 +19,7 @@ namespace ObjectPrinting
 
 	public class ObjectPrinter<TOwner> : IObjectPrinter<TOwner>
 	{
+		private List<object> visitedTypes = new List<object>();
 		private ImmutableList<string> propertiesToExclude = ImmutableList<string>.Empty;
 
 		internal ImmutableDictionary<string, Func<object, string>> SerializationForProperties
@@ -66,8 +68,11 @@ namespace ObjectPrinting
 			{
 				var propertyType = propertyInfo.PropertyType;
 				var propertyName = propertyInfo.Name;
-
-				if (propertyInfo.GetValue(obj) == obj)
+				
+				if (typesToExclude.Contains(propertyType)
+					|| propertiesToExclude.Contains(propertyName))
+					continue;
+				if (visitedTypes.Contains(propertyInfo.GetValue(obj)))
 				{
 					return sb.Append(identation)
 						.Append(propertyInfo.Name)
@@ -75,10 +80,8 @@ namespace ObjectPrinting
 						.Append(Environment.NewLine)
 						.ToString();
 				}
+				visitedTypes.Add(obj);
 
-				if (typesToExclude.Contains(propertyType)
-					|| propertiesToExclude.Contains(propertyName))
-					continue;
 				if (SerializationForProperties.ContainsKey(propertyName))
 				{
 					sb.Append(identation)
