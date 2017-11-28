@@ -67,6 +67,14 @@ namespace ObjectPrinting
 				var propertyType = propertyInfo.PropertyType;
 				var propertyName = propertyInfo.Name;
 
+				if (propertyInfo.GetValue(obj) == obj)
+				{
+					return sb.Append(identation)
+						.Append(propertyInfo.Name)
+						.Append(" = object itself")
+						.Append(Environment.NewLine)
+						.ToString();
+				}
 
 				if (typesToExclude.Contains(propertyType)
 					|| propertiesToExclude.Contains(propertyName))

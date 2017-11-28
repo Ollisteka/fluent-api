@@ -17,4 +17,9 @@ namespace ObjectPrinting.Tests
 	{
 		public int[] arr { get; set; }
 	}
+
+	class R
+	{
+		public R r { get; set; }
+	}
 }

@@ -17,6 +17,15 @@ namespace ObjectPrinting.Tests
 		private Person person;
 
 		[Test]
+
+		public void Printing_Should_Work_When_Recursion()
+		{
+			var r = new R();
+			r.r = r;
+			ObjectPrinter.For<R>().PrintToString(r).Should().Be("R\r\n\tr = object itself\r\n");
+		}
+
+		[Test]
 		public void ChangeCulturalInfo()
 		{
 			person.Height = 11.2;
