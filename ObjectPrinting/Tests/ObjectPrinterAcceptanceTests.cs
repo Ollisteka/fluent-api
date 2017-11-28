@@ -84,19 +84,6 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
-		public void DoSomething_WhenSomething()
-		{
-
-			var printer = ObjectPrinter
-				.For<Entry>()
-				.Print<string>();
-			var p1 = printer.Using(x => x.ToLower());
-			var p2 = printer.Using(x => x.ToUpper());
-			var entry = new Entry {s = "aBc"};
-			p1.PrintToString(entry).Should().Be("Entry\r\n\ts = abc\r\n");
-			p2.PrintToString(entry).Should().Be("Entry\r\n\ts = ABC\r\n");
-		}
-		[Test]
 		public void Exclude_Property()
 		{
 			ObjectPrinter.For<Person>()
@@ -110,6 +97,18 @@ namespace ObjectPrinting.Tests
 			ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
 				.Excluding<int>().PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11\r\n");
+		}
+
+		[Test]
+		public void PrintEnumerable()
+		{
+			var e = new E
+			{
+				arr = new[] {1, 2, 3}
+			};
+
+			var printer = ObjectPrinter.For<E>();
+			printer.PrintToString(e).Should().Be("E\r\n\tarr = Int32[]\r\n\t\tSystem.Int32[] = 1, 2, 3\r\n");
 		}
 
 		[Test]
@@ -173,6 +172,19 @@ namespace ObjectPrinting.Tests
 			var secondResult = secondConfig.PrintToString(person);
 			firstResult.Should().Be("Person\r\n\tName = Al\r\n");
 			secondResult.Should().Be("Person\r\n\tName = Alex\r\n");
+		}
+
+		[Test]
+		public void PropertyConfig_Shoud_BeImmutable()
+		{
+			var printer = ObjectPrinter
+				.For<Entry>()
+				.Print<string>();
+			var p1 = printer.Using(x => x.ToLower());
+			var p2 = printer.Using(x => x.ToUpper());
+			var entry = new Entry {s = "aBc"};
+			p1.PrintToString(entry).Should().Be("Entry\r\n\ts = abc\r\n");
+			p2.PrintToString(entry).Should().Be("Entry\r\n\ts = ABC\r\n");
 		}
 
 		[Test]

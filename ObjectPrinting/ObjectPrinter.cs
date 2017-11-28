@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
@@ -49,10 +50,23 @@ namespace ObjectPrinting
 			var sb = new StringBuilder();
 			var type = obj.GetType();
 			sb.AppendLine(type.Name);
+			if (obj is IEnumerable)
+			{
+				sb.Append(identation)
+					.Append(obj)
+					.Append(" = ");
+				foreach (var item in obj as IEnumerable)
+					sb.Append(PrintToString(item, nestingLevel + 1).Trim(Environment.NewLine.ToCharArray()))
+						.Append(", ");
+				sb.Remove(sb.Length - 2, 2)
+					.Append(Environment.NewLine);
+				return sb.ToString();
+			}
 			foreach (var propertyInfo in type.GetProperties())
 			{
 				var propertyType = propertyInfo.PropertyType;
 				var propertyName = propertyInfo.Name;
+
 
 				if (typesToExclude.Contains(propertyType)
 					|| propertiesToExclude.Contains(propertyName))

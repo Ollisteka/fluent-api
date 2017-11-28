@@ -13,4 +13,8 @@ namespace ObjectPrinting.Tests
 	{
 		public string s { get; set; }
 	}
+	class E
+	{
+		public int[] arr { get; set; }
+	}
 }
