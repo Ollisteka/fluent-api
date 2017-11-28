@@ -21,5 +21,11 @@ namespace ObjectPrinting.Tests
 	class R
 	{
 		public R r { get; set; }
+		public D d { get; set; }
+	}
+
+	class D
+	{
+		public R r { get; set; }
 	}
 }

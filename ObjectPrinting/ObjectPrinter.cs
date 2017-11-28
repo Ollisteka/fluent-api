@@ -19,7 +19,6 @@ namespace ObjectPrinting
 
 	public class ObjectPrinter<TOwner> : IObjectPrinter<TOwner>
 	{
-		private readonly List<object> visitedObjects = new List<object>();
 		private ImmutableList<string> propertiesToExclude = ImmutableList<string>.Empty;
 
 		internal ImmutableDictionary<string, Func<object, string>> SerializationForProperties
@@ -32,10 +31,10 @@ namespace ObjectPrinting
 
 		public string PrintToString(TOwner obj)
 		{
-			return PrintToString(obj, 0);
+			return PrintToString(obj, 0, new Stack<object>());
 		}
 
-		private string PrintToString(object obj, int nestingLevel)
+		private string PrintToString(object obj, int nestingLevel, Stack<object> visitedObjects)
 		{
 			if (obj == null)
 				return "null" + Environment.NewLine;
@@ -58,29 +57,31 @@ namespace ObjectPrinting
 					.Append(obj)
 					.Append(" = ");
 				foreach (var item in obj as IEnumerable)
-					sb.Append(PrintToString(item, nestingLevel + 1).Trim(Environment.NewLine.ToCharArray()))
+					sb.Append(PrintToString(item, nestingLevel + 1, visitedObjects)
+							.Trim(Environment.NewLine.ToCharArray()))
 						.Append(", ");
-				sb.Remove(sb.Length - 2, 2)
-					.Append(Environment.NewLine);
-				return sb.ToString();
+				;
+				return sb.Remove(sb.Length - 2, 2)
+					.Append(Environment.NewLine)
+					.ToString();
 			}
 			foreach (var propertyInfo in type.GetProperties())
 			{
 				var propertyType = propertyInfo.PropertyType;
 				var propertyName = propertyInfo.Name;
-				
+
 				if (typesToExclude.Contains(propertyType)
 					|| propertiesToExclude.Contains(propertyName))
 					continue;
+				visitedObjects.Push(obj);
 				if (visitedObjects.Contains(propertyInfo.GetValue(obj)))
 				{
-					return sb.Append(identation)
+					sb.Append(identation)
 						.Append(propertyInfo.Name)
 						.Append(" = object itself")
-						.Append(Environment.NewLine)
-						.ToString();
+						.Append(Environment.NewLine);
+					continue;
 				}
-				visitedObjects.Add(obj);
 
 				if (SerializationForProperties.ContainsKey(propertyName))
 				{
@@ -103,8 +104,9 @@ namespace ObjectPrinting
 				sb.Append(identation)
 					.Append(propertyInfo.Name)
 					.Append(" = ")
-					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1));
+					.Append(PrintToString(propertyInfo.GetValue(obj), nestingLevel + 1, visitedObjects));
 			}
+			visitedObjects.Pop();
 			return sb.ToString();
 		}
 

@@ -100,7 +100,7 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
-		public void PrintEnumerable()
+		public void Printing_Should_Work_When_Enumerable()
 		{
 			var e = new E
 			{
@@ -116,9 +116,18 @@ namespace ObjectPrinting.Tests
 		{
 			var r = new R();
 			r.r = r;
-			ObjectPrinter.For<R>().PrintToString(r).Should().Be("R\r\n\tr = R\r\n\t\tr = object itself\r\n");
+			ObjectPrinter.For<R>().PrintToString(r).Should().Be("R\r\n\tr = object itself\r\n\td = null\r\n");
 		}
 
+		[Test]
+		public void Printing_Should_Work_When_DoubleRecursion()
+		{
+			var d = new D();
+			var r = new R {d = d};
+			d.r = r;
+			r.r = r;
+			Console.WriteLine(ObjectPrinter.For<D>().PrintToString(d));
+		}
 		[Test]
 		public void PrintingConfig_ShouldBe_Immutable_When_CustomPropertySerialization()
 		{
