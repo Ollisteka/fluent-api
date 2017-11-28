@@ -19,7 +19,7 @@ namespace ObjectPrinting
 
 	public class ObjectPrinter<TOwner> : IObjectPrinter<TOwner>
 	{
-		private List<object> visitedTypes = new List<object>();
+		private readonly List<object> visitedObjects = new List<object>();
 		private ImmutableList<string> propertiesToExclude = ImmutableList<string>.Empty;
 
 		internal ImmutableDictionary<string, Func<object, string>> SerializationForProperties
@@ -72,7 +72,7 @@ namespace ObjectPrinting
 				if (typesToExclude.Contains(propertyType)
 					|| propertiesToExclude.Contains(propertyName))
 					continue;
-				if (visitedTypes.Contains(propertyInfo.GetValue(obj)))
+				if (visitedObjects.Contains(propertyInfo.GetValue(obj)))
 				{
 					return sb.Append(identation)
 						.Append(propertyInfo.Name)
@@ -80,7 +80,7 @@ namespace ObjectPrinting
 						.Append(Environment.NewLine)
 						.ToString();
 				}
-				visitedTypes.Add(obj);
+				visitedObjects.Add(obj);
 
 				if (SerializationForProperties.ContainsKey(propertyName))
 				{
