@@ -32,25 +32,29 @@ namespace ObjectPrinting
 		public static ObjectPrinter<TOwner> Using<TOwner>
 			(this PropertyPrinter<TOwner, int> propConfig, CultureInfo cultInfo)
 		{
-			return ChangeCultureForType(propConfig, cultInfo);
+			var newConfig = propConfig.CopyCurrentPropertyPrint();
+			return ChangeCultureForType(newConfig, cultInfo);
 		}
 
 		public static ObjectPrinter<TOwner> Using<TOwner>
 			(this PropertyPrinter<TOwner, double> propConfig, CultureInfo cultInfo)
 		{
-			return ChangeCultureForType(propConfig, cultInfo);
+			var newConfig = propConfig.CopyCurrentPropertyPrint();
+			return ChangeCultureForType(newConfig, cultInfo);
 		}
 
 		public static ObjectPrinter<TOwner> Using<TOwner>
 			(this PropertyPrinter<TOwner, float> propConfig, CultureInfo cultInfo)
 		{
-			return ChangeCultureForType(propConfig, cultInfo);
+			var newConfig = propConfig.CopyCurrentPropertyPrint();
+			return ChangeCultureForType(newConfig, cultInfo);
 		}
 
 		public static ObjectPrinter<TOwner> Using<TOwner>
 			(this PropertyPrinter<TOwner, long> propConfig, CultureInfo cultInfo)
 		{
-			return ChangeCultureForType(propConfig, cultInfo);
+			var newConfig = propConfig.CopyCurrentPropertyPrint();
+			return ChangeCultureForType(newConfig, cultInfo);
 		}
 
 		public static ObjectPrinter<TOwner> TakeSubstring<TOwner>

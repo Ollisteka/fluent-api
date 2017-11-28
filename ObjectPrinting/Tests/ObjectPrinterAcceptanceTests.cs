@@ -112,7 +112,22 @@ namespace ObjectPrinting.Tests
 		}
 
 		[Test]
-		public void PrintingConfig_ShouldBeImmutable_When_CustomPropertySerialization()
+		public void PropertyConfig_ShoudBe_Immutable_When_ChangingCultureInfo()
+		{
+			person.Height = 11.2;
+			var printer = ObjectPrinter
+				.For<Person>()
+				.Excluding<Guid>()
+				.Excluding<int>()
+				.Print<double>();
+			var p1 = printer.Using(CultureInfo.InvariantCulture);
+			var p2 = printer.Using(x => "NUM");
+			p1.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = 11.2\r\n");
+			p2.PrintToString(person).Should().Be("Person\r\n\tName = Alex\r\n\tHeight = NUM\r\n");
+		}
+
+		[Test]
+		public void PrintingConfig_ShouldBe_Immutable_When_CustomPropertySerialization()
 		{
 			var firstConfig = ObjectPrinter.For<Person>()
 				.Excluding<Guid>()
